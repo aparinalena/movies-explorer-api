@@ -6,6 +6,7 @@ const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
 const AuthError = require('../errors/AuthError');
 const config = require('../utils/config');
+const errorMessages = require('../utils/errors');
 
 const createUser = (req, res, next) => {
   const {
@@ -22,9 +23,9 @@ const createUser = (req, res, next) => {
     .then(() => res.send({ email, name }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Ошибка: Переданы некорректные данные при обновлении профиля'));
+        next(new BadRequestError(errorMessages.BadEmailOrName));
       } else if (err.code === 11000) {
-        next(new ConflictError('Ошибка: Пользователь с такой почтой уже зарегистрирован'));
+        next(new ConflictError(errorMessages.DuplicateEmail));
       } else {
         next(err);
       }
@@ -34,18 +35,9 @@ const createUser = (req, res, next) => {
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if (user) {
-        return res.send(user);
-      }
-      throw new NotFoundError('Ошибка: Пользователь не найден');
+      res.send({ email: user.email, name: user.name });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Произошла ошибка: Передан невалидный id'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 const login = (req, res, next) => {
@@ -73,13 +65,15 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (user) {
-        return res.send(user);
+        return res.send({ email: user.email, name: user.name });
       }
-      throw new NotFoundError('Ошибка: Пользователь не найден');
+      throw new NotFoundError(errorMessages.NotFoundUser);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Ошибка: Переданы некорректные данные при обновлении профиля');
+        next(new BadRequestError(errorMessages.BadEmailOrName));
+      } else if (err.code === 11000) {
+        next(new ConflictError(errorMessages.DuplicateEmail));
       } else {
         next(err);
       }
