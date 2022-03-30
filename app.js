@@ -9,6 +9,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const allRouters = require('./routes/index');
 const config = require('./utils/config');
 const limiter = require('./utils/limit');
+const errorMessages = require('./utils/errors');
 
 const { dbSrc, NODE_ENV } = process.env;
 const { PORT = 3000 } = process.env;
@@ -48,7 +49,7 @@ app.use((err, req, res, next) => {
     .status(statusCode)
     .send({
       message: statusCode === 500
-        ? 'Ошибка на сервере'
+        ? errorMessages.ServerError
         : message,
     });
   next();
