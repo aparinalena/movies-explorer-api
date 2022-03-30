@@ -12,7 +12,7 @@ const errorMessages = {
   BadUrl: 'Неправильный формат URL',
   BadEmail: 'Неправильный формат почты',
   BadEmailOrPassword: 'Неправильные почта или пароль',
-  AuthorizationError: 'Необходима авторизоваться',
+  AuthorizationError: 'Необходимо авторизоваться',
 };
 
 module.exports = errorMessages;
